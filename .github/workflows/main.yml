@@ -23,11 +23,13 @@ jobs:
 
       # Step 2: Clone terraform-modules repository
       - name: Clone terraform-modules repository
-        run: git clone https://github.com/sachinakshay/terraform-modules.git
+        run: git clone https://github.com/sachinakshay/terraform-modules.git terraform-modules
 
-      # Step 3: Verify cloned repository structure
-      - name: List cloned repository
-        run: ls -R terraform-modules
+      # Step 3: Debugging - List the directory structure
+      - name: List directory structure
+        run: |
+          echo "List files in the working directory:"
+          ls -R
 
       # Step 4: Set up Terraform
       - name: Setup Terraform
@@ -37,18 +39,18 @@ jobs:
 
       # Step 5: Initialize Terraform
       - name: Terraform Init
-        working-directory: terraform-modules/ec2
+        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
         run: terraform init
 
       # Step 6: Terraform Plan
       - name: Terraform Plan
-        working-directory: terraform-modules/ec2
+        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
         run: terraform plan
 
       # Step 7: Terraform Apply (Only on Push to Main Branch)
       - name: Terraform Apply
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: terraform-modules/ec2
+        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
         run: terraform apply -auto-approve
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
