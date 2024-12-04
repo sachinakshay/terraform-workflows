@@ -29,7 +29,7 @@ jobs:
       - name: List directory structure
         run: |
           echo "List files in the working directory:"
-          ls -R
+          ls -R /home/runner/work/terraform-workflows/terraform-workflows/
 
       # Step 4: Set up Terraform
       - name: Setup Terraform
@@ -37,21 +37,23 @@ jobs:
         with:
           terraform_version: 1.5.7
 
-      # Step 5: Initialize Terraform
-      - name: Terraform Init
-        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
+      # Step 5: Initialize Terraform for EC2 Module
+      - name: Terraform Init (EC2 Module)
+        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
         run: terraform init
 
-      # Step 6: Terraform Plan
-      - name: Terraform Plan
-        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
+      # Step 6: Terraform Plan for EC2 Module
+      - name: Terraform Plan (EC2 Module)
+        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
         run: terraform plan
 
       # Step 7: Terraform Apply (Only on Push to Main Branch)
-      - name: Terraform Apply
+      - name: Terraform Apply (EC2 Module)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: terraform-modules/ec2  # Adjust this for EC2, S3, or VPC as needed
+        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
         run: terraform apply -auto-approve
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Repeat similar steps for s3 and vpc modules if needed
