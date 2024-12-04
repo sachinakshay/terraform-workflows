@@ -1,0 +1,51 @@
+name: Terraform CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      # Step 1: Checkout the primary repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Clone the terraform-modules repository
+      - name: Clone terraform-modules repository
+        run: git clone https://github.com/sachinakshay/terraform-modules.git terraform-modules
+
+      # Step 3: Set up Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7 # Specify your version
+
+      # Step 4: Terraform Init
+      - name: Terraform Init
+        working-directory: terraform-modules/ec2 # Change this path for S3 or VPC modules
+        run: terraform init
+
+      # Step 5: Terraform Plan
+      - name: Terraform Plan
+        working-directory: terraform-modules/ec2 # Change this path for S3 or VPC modules
+        run: terraform plan
+
+      # Step 6: Terraform Apply (Only on Push to Main Branch)
+      - name: Terraform Apply
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: terraform-modules/ec2 # Change this path for S3 or VPC modules
+        run: terraform apply -auto-approve
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
