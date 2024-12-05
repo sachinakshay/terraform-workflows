@@ -6,7 +6,7 @@ provider "aws" {
 resource "aws_vpc" "main" {
   count      = var.create_vpc ? 1 : 0
   cidr_block = var.vpc_cidr
-  tags       = { Name = "Main-VPC" }
+  tags       = { Name = "Action-VPC" }
 }
 
 resource "aws_subnet" "main" {
@@ -14,7 +14,7 @@ resource "aws_subnet" "main" {
   vpc_id            = aws_vpc.main[0].id
   cidr_block        = var.subnet_cidr
   availability_zone = var.availability_zone
-  tags              = { Name = "Main-Subnet" }
+  tags              = { Name = "Action-Subnet" }
 }
 
 resource "aws_instance" "main" {
@@ -23,7 +23,7 @@ resource "aws_instance" "main" {
   instance_type = var.instance_type
   subnet_id     = var.create_vpc ? aws_subnet.main[0].id : var.subnet_id 
   key_name      = var.key_pair_name
-  tags          = { Name = "Main-EC2" }
+  tags          = { Name = "Action-EC2" }
 }
 
 resource "random_id" "bucket_suffix" {
@@ -34,7 +34,7 @@ resource "random_id" "bucket_suffix" {
 resource "aws_s3_bucket" "main" {
   count  = var.create_s3 ? 1 : 0
   bucket = "${var.s3_bucket_name}-${random_id.bucket_suffix[0].hex}"
-  tags   = { Name = "Main-S3" }
+  tags   = { Name = "Action-S3" }
 }
 
 resource "aws_launch_template" "main" {
