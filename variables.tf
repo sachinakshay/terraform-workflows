@@ -1,37 +1,37 @@
 variable "create_vpc" {
   description = "Set to true to create a VPC"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "create_ec2" {
   description = "Set to true to create an EC2 instance"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "create_s3" {
   description = "Set to true to create an S3 bucket"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "create_autoscaling" {
   description = "Set to true to create an Auto Scaling group"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
-  default     = "10.0.0.0/16"
+  default     = "172.31.0.0/16"
 }
 
 variable "subnet_cidr" {
   description = "CIDR block for the Subnet"
   type        = string
-  default     = "10.0.1.0/24"
+  default     = "172.31.32.0/20"
 }
 
 variable "availability_zone" {
