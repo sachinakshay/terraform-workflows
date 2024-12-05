@@ -1,59 +1,119 @@
-name: Terraform CI/CD Pipeline
+name: Terraform CI/CD Workflow
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: "AWS Region where resources will be deployed"
+        required: true
+        default: "us-east-1"
+        type: choice
+        options:
+          - us-east-1
+          - us-west-1
+          - us-west-2
+      create_vpc:
+        description: "Set to true to create a VPC"
+        required: true
+        default: false
+        type: choice
+        options:
+          - true
+          - false
+      create_ec2:
+        description: "Set to true to create an EC2 instance"
+        required: true
+        default: false
+        type: choice
+        options:
+          - true
+          - false
+      create_s3:
+        description: "Set to true to create an S3 bucket"
+        required: true
+        default: false
+        type: choice
+        options:
+          - true
+          - false
+      create_autoscaling:
+        description: "Set to true to create an Autoscaling Group"
+        required: true
+        default: false
+        type: choice
+        options:
+          - true
+          - false
+      ami_id:
+        description: "AMI ID for EC2 instance and Autoscaling"
+        required: true
+        default: "ami-0866a3c8686eaeeba"
+      instance_type:
+        description: "Instance type for EC2 and Autoscaling"
+        required: true
+        default: "t2.micro"
+      subnet_id:
+        description: "Subnet ID for EC2 instance"
+        required: true
+        default: "subnet-057e4e2e3f3b55fe1"
+      security_group_id:
+        description: "Security Group ID for EC2 instance"
+        required: true
+        default: "sg-02868a905c1e1e36e"
+      s3_bucket_name:
+        description: "Prefix for S3 bucket name"
+        required: true
+        default: "example-bucket"
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      id-token: write
-
     steps:
-      # Step 1: Checkout repository
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # Step 2: Clone terraform-modules repository
-      - name: Clone terraform-modules repository
-        run: git clone https://github.com/sachinakshay/terraform-modules.git terraform-modules
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-      # Step 3: Debugging - List the directory structure
-      - name: List directory structure
-        run: |
-          echo "List files in the working directory:"
-          ls -R /home/runner/work/terraform-workflows/terraform-workflows/
+    - name: Terraform Init
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: terraform init
 
-      # Step 4: Set up Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
+    - name: Terraform Plan
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        terraform plan \
+          -var="aws_region=${{ github.event.inputs.aws_region }}" \
+          -var="create_vpc=${{ github.event.inputs.create_vpc }}" \
+          -var="create_ec2=${{ github.event.inputs.create_ec2 }}" \
+          -var="create_s3=${{ github.event.inputs.create_s3 }}" \
+          -var="create_autoscaling=${{ github.event.inputs.create_autoscaling }}" \
+          -var="ami_id=${{ github.event.inputs.ami_id }}" \
+          -var="instance_type=${{ github.event.inputs.instance_type }}" \
+          -var="subnet_id=${{ github.event.inputs.subnet_id }}" \
+          -var="security_group_id=${{ github.event.inputs.security_group_id }}" \
+          -var="s3_bucket_name=${{ github.event.inputs.s3_bucket_name }}"
 
-      # Step 5: Initialize Terraform for EC2 Module
-      - name: Terraform Init (EC2 Module)
-        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
-        run: terraform init
-
-      # Step 6: Terraform Plan for EC2 Module
-      - name: Terraform Plan (EC2 Module)
-        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
-        run: terraform plan
-
-      # Step 7: Terraform Apply (Only on Push to Main Branch)
-      - name: Terraform Apply (EC2 Module)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: terraform-modules/modules/ec2  # Updated path to ec2 module
-        run: terraform apply -auto-approve
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      # Repeat similar steps for s3 and vpc modules if needed
+    - name: Terraform Apply
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: |
+        terraform apply -auto-approve \
+          -var="aws_region=${{ github.event.inputs.aws_region }}" \
+          -var="create_vpc=${{ github.event.inputs.create_vpc }}" \
+          -var="create_ec2=${{ github.event.inputs.create_ec2 }}" \
+          -var="create_s3=${{ github.event.inputs.create_s3 }}" \
+          -var="create_autoscaling=${{ github.event.inputs.create_autoscaling }}" \
+          -var="ami_id=${{ github.event.inputs.ami_id }}" \
+          -var="instance_type=${{ github.event.inputs.instance_type }}" \
+          -var="subnet_id=${{ github.event.inputs.subnet_id }}" \
+          -var="security_group_id=${{ github.event.inputs.security_group_id }}" \
+          -var="s3_bucket_name=${{ github.event.inputs.s3_bucket_name }}"
