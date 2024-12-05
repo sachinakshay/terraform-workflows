@@ -1,6 +1,6 @@
 create_vpc          = true
 create_ec2          = true
-create_s3           = false
+create_s3           = true
 create_autoscaling  = true
 ami_id              = "ami-0866a3c8686eaeeba"
 key_pair_name       = "action"
