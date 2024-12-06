@@ -20,38 +20,6 @@ on:
         options:
           - apply
           - destroy
-      create_vpc:
-        description: "Set to true to create a VPC"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_ec2:
-        description: "Set to true to create an EC2 instance"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_s3:
-        description: "Set to true to create an S3 bucket"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_autoscaling:
-        description: "Set to true to create an Autoscaling Group"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
       destroy_vpc:
         description: "Set to true to destroy the VPC"
         required: false
@@ -104,6 +72,7 @@ on:
         description: "Prefix for S3 bucket name"
         required: true
         default: "example-bucket"
+
 
 jobs:
   terraform:
