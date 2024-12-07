@@ -1,119 +1,28 @@
-name: Terraform CI/CD Workflow
+name: Manual Trigger Workflow with Inputs
 
 on:
   workflow_dispatch:
     inputs:
-      aws_region:
-        description: "AWS Region where resources will be deployed"
-        required: true
-        default: "us-east-1"
-        type: choice
-        options:
-          - us-east-1
-          - us-west-1
-          - us-west-2
-      create_vpc:
-        description: "Set to true to create a VPC"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_ec2:
-        description: "Set to true to create an EC2 instance"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_s3:
-        description: "Set to true to create an S3 bucket"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
-      create_autoscaling:
-        description: "Set to true to create an Autoscaling Group"
-        required: true
-        default: false
-        type: choice
-        options:
-          - true
-          - false
       ami_id:
-        description: "AMI ID for EC2 instance and Autoscaling"
+        description: 'AMI ID'
         required: true
-        default: "ami-0866a3c8686eaeeba"
-      instance_type:
-        description: "Instance type for EC2 and Autoscaling"
+        default: 'hfhjgjg'
+      vpc_cidr:
+        description: '10.0.0.0/16'
         required: true
-        default: "t2.micro"
-      subnet_id:
-        description: "Subnet ID for EC2 instance"
-        required: true
-        default: "subnet-00c4a2e995cce6293"
-      security_group_id:
-        description: "Security Group ID for EC2 instance"
-        required: true
-        default: "sg-068223c218a9d62ee"
-      s3_bucket_name:
-        description: "Prefix for S3 bucket name"
-        required: true
-        default: "example-bucket"
+        default: '10.0.0.0/16'
 
 jobs:
-  terraform:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
-
-    - name: Terraform Init
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: terraform init
-
-    - name: Terraform Plan
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        terraform plan \
-          -var="aws_region=${{ github.event.inputs.aws_region }}" \
-          -var="create_vpc=${{ github.event.inputs.create_vpc }}" \
-          -var="create_ec2=${{ github.event.inputs.create_ec2 }}" \
-          -var="create_s3=${{ github.event.inputs.create_s3 }}" \
-          -var="create_autoscaling=${{ github.event.inputs.create_autoscaling }}" \
-          -var="ami_id=${{ github.event.inputs.ami_id }}" \
-          -var="instance_type=${{ github.event.inputs.instance_type }}" \
-          -var="subnet_id=${{ github.event.inputs.subnet_id }}" \
-          -var="security_group_id=${{ github.event.inputs.security_group_id }}" \
-          -var="s3_bucket_name=${{ github.event.inputs.s3_bucket_name }}"
-
-    - name: Terraform Apply
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      run: |
-        terraform apply -auto-approve \
-          -var="aws_region=${{ github.event.inputs.aws_region }}" \
-          -var="create_vpc=${{ github.event.inputs.create_vpc }}" \
-          -var="create_ec2=${{ github.event.inputs.create_ec2 }}" \
-          -var="create_s3=${{ github.event.inputs.create_s3 }}" \
-          -var="create_autoscaling=${{ github.event.inputs.create_autoscaling }}" \
-          -var="ami_id=${{ github.event.inputs.ami_id }}" \
-          -var="instance_type=${{ github.event.inputs.instance_type }}" \
-          -var="subnet_id=${{ github.event.inputs.subnet_id }}" \
-          -var="security_group_id=${{ github.event.inputs.security_group_id }}" \
-          -var="s3_bucket_name=${{ github.event.inputs.s3_bucket_name }}"
+      - name: Print input values
+        run: |
+          echo "Deploying branch: ${{ github.event.inputs.branch }}"
+ 
+      - name: Deploy application
+        run: |
+          echo "AMI  ID ${{ github.event.inputs.ami_id }}" 
